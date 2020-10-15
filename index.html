@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Sunrise animation (GSAP)</title>
+   <style>
+      * {
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+      }
+
+      :root {
+         --sun-diameter: 20vh;
+         --land-height: 25vh;
+         --sun-blur: 90px;
+         --sun-color-start: #ff8c00;
+         --sun-color-end: #ffd700;
+         --land-color: #1E6C18;
+         --sky-color: #1D4479;
+      }
+
+      body {
+         background-color: var(--sky-color);
+      }
+
+      .land {
+         position: absolute;
+         width: 100%;
+         height: var(--land-height);
+         left: 0;
+         bottom: 0;
+         background-color: var(--land-color);
+         z-index: 1;
+      }
+
+      .sun {
+         position: absolute;
+         width: var(--sun-diameter);
+         height: var(--sun-diameter);
+         border-radius: 50%;
+         left: 0vw;
+         bottom: calc(var(--land-height) - var(--sun-diameter));
+         background-color: var(--sun-color-start);
+         box-shadow: 0 0 var(--sun-blur) 70px var(--sun-color-start);
+      }
+
+      .start{
+         position: absolute;
+         left: 50%;
+         top: 30px;
+         transform: translateX(-50%);
+         color: black;
+         font-weight: bold;
+         background-color: red;
+         border: 2px solid black;
+         padding: 8px 12px;
+         border-radius: 50%;
+         transition: 0.4s;
+         cursor: not-allowed;
+      }
+
+      .active{
+         background-color: #555;
+         color: antiquewhite;
+         font-weight: normal;
+         cursor: pointer;
+      }
+      
+      .start.active:hover{
+         color: black;
+         font-weight: bold;
+         background-color: #888;
+         box-shadow: 0 0 20px 5px antiquewhite;
+      }
+
+   </style>
+</head>
+
+<body>
+   <div class="land"></div>
+   <div class="sun"></div>
+   <button class="start active">START</button>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+   <script>
+      const sun = document.querySelector('.sun');
+      const land = document.querySelector('.land');
+
+      const sunDiameter = parseInt(getComputedStyle(sun).getPropertyValue('--sun-diameter'), 10) * (window.innerHeight /
+         100);
+      const sunColorEnd = getComputedStyle(sun).getPropertyValue('--sun-color-end');
+      const landHeight = parseInt(getComputedStyle(land).getPropertyValue('--land-height'), 10) * (window.innerHeight /
+         100);
+
+      const sunStartingPositionY = parseInt(getComputedStyle(sun).bottom, 10) - (landHeight - sunDiameter);
+      const sunTransitionX = window.innerWidth - sunDiameter;
+      const sunTransitionY = window.innerHeight / 2 - (sunStartingPositionY + sunDiameter / 2);
+
+      const animationTime = 8;
+
+      const animation = () => {
+         setTimeout(() => {
+            TweenMax.to('.sun', animationTime, {
+               x: sunTransitionX,
+               ease: 'linear',
+               onComplete: () => {
+                  setTimeout(() => {
+                     startBtn.addEventListener('click', animation);
+                     startBtn.classList.toggle('active');
+                     startBtn.textContent = 'START';
+                     TweenMax.to('.sun', 0, {
+                        x: 0
+                     });
+                  }, 2000);
+               }
+            });
+            TweenMax.to('.sun', animationTime / 2, {
+               y: -sunTransitionY,
+               backgroundColor: sunColorEnd,
+               boxShadow: `0 0 90px 70px ${sunColorEnd}`,
+               ease: "power1.out",
+               repeat: 1,
+               yoyo: true,
+            });
+            TweenMax.to('.land', animationTime / 2, {
+               backgroundColor: '#28D71A',
+               ease: 'linear',
+               repeat: 1,
+               yoyo: true
+            });
+            TweenMax.to('body', animationTime / 2, {
+               backgroundColor: '#35BFF0',
+               ease: 'linear',
+               repeat: 1,
+               yoyo: true
+            });
+         }, 1000);
+
+         startBtn.removeEventListener('click', animation);
+         startBtn.classList.toggle('active');
+         startBtn.textContent = 'WAIT';
+      }
+
+      const startBtn = document.querySelector('.start');
+      startBtn.addEventListener('click', animation);
+
+   </script>
+</body>
+
+</html>
